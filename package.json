@@ -6,7 +6,7 @@
     "dev": "cd frontend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "dev:backend": "cd backend && npm run dev",
-    "build:frontend": "npm --prefix frontend install && cd frontend && npm run build && node -e \"import('node:fs').then(f => f.cpSync('dist', '../dist', {recursive: true, force: true}))\"",
+    "build:frontend": "npm --prefix frontend install && cd frontend && npm run build && node -e \"import('node:fs').then(async f => { await f.cpSync('dist', '../dist', {recursive: true, force: true}); await f.cpSync('dist/assets', '../assets', {recursive: true, force: true}); await f.copyFileSync('dist/index.html', '../index.html'); })\"",
     "build:backend": "npm --prefix backend install && cd backend && npm run build",
     "build": "npm run build:frontend"
   }
