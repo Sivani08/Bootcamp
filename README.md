@@ -1,27 +1,82 @@
-# Mindful Insight Hub
+# Intel Blossom Hub / BootMind — Full Stack Architecture
 
-https://github.com/Sivani08/bootmind-iq  
-i need to do some changes in this project so give  me a preview of this project
+A complete bootcamp management and learning intelligence workspace.
 
-This project was built with [Lovable](https://lovable.dev).
+## 🏗️ Architecture Overview
 
-**Live app**: https://intel-blossom-hub.lovable.app
+The project is structured with clean separation of concerns:
 
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/679df333-773e-4336-87a0-17792aff8a6f).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
 ```
+intel-blossom-hub/
+├── frontend/             # React 18 + TanStack Router + Tailwind CSS SPA (Deployed on Vercel)
+│   ├── src/              # Components, Pages, Routes, Hooks, Utilities, Styling
+│   ├── public/           # Static media, favicons, logos
+│   ├── vite.config.ts    # Standalone Vite SPA bundler configuration
+│   ├── vercel.json       # Clean SPA deep link routing rewrites
+│   └── .env.example      # Frontend environment variables template
+│
+├── backend/              # Node.js / Express REST API Service (Deployed on Render)
+│   ├── src/              # Controllers, Services, Middlewares, REST Endpoints
+│   ├── tsconfig.json     # NodeNext TypeScript compilation configuration
+│   └── .env.example      # Backend environment variables template
+│
+└── README.md             # Architecture & Deployment Documentation
+```
+
+---
+
+## ⚡ Key Principles Preserved
+
+- **100% UI/UX Preservation**: All dashboards, trainee rosters, task submissions, meeting logs, quizzes, scorecards, and reports remain pixel-identical.
+- **Zero Lock-in**: Antigravity is the single source of truth; all Lovable-specific and Nitro-specific build complexities have been replaced with standard Vite & Express pipelines.
+- **Security & RLS**: Sensitive administrative keys (`SUPABASE_SERVICE_ROLE_KEY`) are restricted strictly to the Render Backend REST API and never exposed to client browsers.
+
+---
+
+## 🚀 Local Development Setup
+
+### 1. Backend (REST API Service)
+```bash
+cd backend
+npm install
+npm run dev
+# Starts REST API on http://localhost:3000
+```
+
+### 2. Frontend (Vite Single Page Application)
+```bash
+cd frontend
+npm install
+npm run dev
+# Starts Frontend SPA on http://localhost:5173 (or http://localhost:8080)
+```
+
+---
+
+## 🌐 Production Deployment Guide
+
+### A. Deploy Backend to Render
+
+1. Create a **Web Service** on [Render](https://render.com).
+2. Connect your GitHub repository (`Sivani08/Bootcamp`).
+3. Set **Root Directory**: `backend`
+4. Set **Build Command**: `npm install && npm run build`
+5. Set **Start Command**: `npm start`
+6. Add Environment Variables:
+   - `PORT`: `3000`
+   - `SUPABASE_URL`: `https://your-project.supabase.co`
+   - `SUPABASE_SERVICE_ROLE_KEY`: `your-service-role-key`
+   - `CLIENT_ORIGIN`: `https://bootcamp-psi-vert.vercel.app`
+
+### B. Deploy Frontend to Vercel
+
+1. Create a **Project** on [Vercel](https://vercel.com).
+2. Connect your GitHub repository (`Sivani08/Bootcamp`).
+3. Set **Root Directory**: `frontend`
+4. Set **Framework Preset**: `Vite`
+5. Set **Build Command**: `npm run build`
+6. Set **Output Directory**: `dist`
+7. Add Environment Variables:
+   - `VITE_SUPABASE_URL`: `https://your-project.supabase.co`
+   - `VITE_SUPABASE_PUBLISHABLE_KEY`: `your-publishable-key`
+   - `VITE_API_BASE_URL`: `https://your-render-backend.onrender.com`
