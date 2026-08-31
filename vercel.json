@@ -1,15 +1,9 @@
 {
-  "cleanUrls": true,
-  "buildCommand": "npm run build:frontend",
-  "outputDirectory": "frontend/dist",
-  "routes": [
+  "outputDirectory": "dist",
+  "rewrites": [
     {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
