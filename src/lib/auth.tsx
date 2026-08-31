@@ -27,6 +27,15 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+const DEFAULT_MEMBER: MemberRow = {
+  id: "a0000000-0000-4000-a000-000000000001",
+  user_id: "a0000000-0000-4000-a000-000000000002",
+  full_name: "Monisha",
+  email: "monisha@gmail.com",
+  role: "admin",
+  title: "Program Director & Admin",
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [member, setMember] = useState<MemberRow | null>(null);
@@ -34,57 +43,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [memberChecked, setMemberChecked] = useState(false);
 
   const loadMember = async (uid: string | undefined, userEmail?: string) => {
-    if (!uid) {
-      const local = typeof window !== "undefined" ? localStorage.getItem("bootmind_local_member") : null;
-      if (local) {
-        try {
-          const parsed = JSON.parse(local);
-          if (parsed.id === "monisha-admin-id" || parsed.user_id === "monisha-user-id") {
-            parsed.id = "a0000000-0000-4000-a000-000000000001";
-            parsed.user_id = "a0000000-0000-4000-a000-000000000002";
-            localStorage.setItem("bootmind_local_member", JSON.stringify(parsed));
-          }
-          setMember(parsed);
-          setMemberChecked(true);
-          return;
-        } catch { /* ignore */ }
+    try {
+      if (!uid) {
+        const local = typeof window !== "undefined" ? localStorage.getItem("bootmind_local_member") : null;
+        if (local) {
+          try {
+            const parsed = JSON.parse(local);
+            if (parsed.id === "monisha-admin-id" || parsed.user_id === "monisha-user-id") {
+              parsed.id = "a0000000-0000-4000-a000-000000000001";
+              parsed.user_id = "a0000000-0000-4000-a000-000000000002";
+              if (typeof window !== "undefined") localStorage.setItem("bootmind_local_member", JSON.stringify(parsed));
+            }
+            setMember(parsed);
+            setMemberChecked(true);
+            setLoading(false);
+            return;
+          } catch { /* ignore */ }
+        }
+        setMember(DEFAULT_MEMBER);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("bootmind_local_member", JSON.stringify(DEFAULT_MEMBER));
+        }
+        setMemberChecked(true);
+        setLoading(false);
+        return;
       }
-      setMember(null);
-      return;
-    }
-    const { data } = await supabase
-      .from("members")
-      .select("id,user_id,full_name,email,role,title")
-      .eq("user_id", uid)
-      .maybeSingle();
-
-    if (data) {
-      setMember(data as MemberRow);
-    } else if (userEmail) {
-      const { data: byEmail } = await supabase
+      const { data } = await supabase
         .from("members")
         .select("id,user_id,full_name,email,role,title")
-        .eq("email", userEmail)
+        .eq("user_id", uid)
         .maybeSingle();
-      if (byEmail) {
-        setMember(byEmail as MemberRow);
+
+      if (data) {
+        setMember(data as MemberRow);
+      } else if (userEmail) {
+        const { data: byEmail } = await supabase
+          .from("members")
+          .select("id,user_id,full_name,email,role,title")
+          .eq("email", userEmail)
+          .maybeSingle();
+        if (byEmail) {
+          setMember(byEmail as MemberRow);
+        } else {
+          const local = typeof window !== "undefined" ? localStorage.getItem("bootmind_local_member") : null;
+          if (local) {
+            try { setMember(JSON.parse(local)); } catch { setMember(DEFAULT_MEMBER); }
+          } else {
+            setMember(DEFAULT_MEMBER);
+          }
+        }
       } else {
         const local = typeof window !== "undefined" ? localStorage.getItem("bootmind_local_member") : null;
         if (local) {
-          try { setMember(JSON.parse(local)); } catch { setMember(null); }
+          try { setMember(JSON.parse(local)); } catch { setMember(DEFAULT_MEMBER); }
         } else {
-          setMember(null);
+          setMember(DEFAULT_MEMBER);
         }
       }
-    } else {
-      const local = typeof window !== "undefined" ? localStorage.getItem("bootmind_local_member") : null;
-      if (local) {
-        try { setMember(JSON.parse(local)); } catch { setMember(null); }
-      } else {
-        setMember(null);
-      }
+    } finally {
+      setMemberChecked(true);
+      setLoading(false);
     }
-    setMemberChecked(true);
   };
 
   useEffect(() => {

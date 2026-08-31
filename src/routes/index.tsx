@@ -1,34 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  Flame,
-  Sparkles,
-  BookOpen,
-  PenTool,
-  Mic,
-  RotateCcw,
-  Award,
-  CheckCircle2,
-  BarChart3,
-  ShieldCheck,
-  ArrowRight,
-} from "lucide-react";
-
-const TITLE = "VocabStreak AI — AI-Powered Daily Vocabulary & Communication Development";
-const DESCRIPTION =
-  "Learn one new word every day, write 3 original sentences, record your speech, and build your communication streak with AI evaluation.";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESCRIPTION },
-      { property: "og:type", content: "website" },
-    ],
-    links: [{ rel: "canonical", href: "/" }],
-  }),
-  component: VocabStreakLandingPage,
+  beforeLoad: () => {
+    throw redirect({ to: "/dashboard" });
+  },
 });
 
 function VocabStreakLandingPage() {
