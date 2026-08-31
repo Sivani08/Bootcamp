@@ -1,0 +1,15 @@
+{
+  "cleanUrls": true,
+  "buildCommand": "npm run build:frontend",
+  "outputDirectory": "frontend/dist",
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
