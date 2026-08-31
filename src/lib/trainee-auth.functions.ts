@@ -160,8 +160,8 @@ export const traineeLogin = createServerFn({ method: "POST" })
         );
       }
 
-      const key = process.env["SUPABASE_PUBLISHABLE_KEY"] || process.env["VITE_SUPABASE_PUBLISHABLE_KEY"]!;
-      const url = process.env["SUPABASE_URL"] || process.env["VITE_SUPABASE_URL"]!;
+      const key = process.env["SUPABASE_PUBLISHABLE_KEY"] || process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] || "placeholder-publishable-key";
+      const url = process.env["SUPABASE_URL"] || process.env["VITE_SUPABASE_URL"] || "https://placeholder-project.supabase.co";
       const publicClient = createClient(url, key, {
         auth: { persistSession: false, autoRefreshToken: false },
         global: {

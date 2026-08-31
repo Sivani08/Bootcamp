@@ -14,8 +14,8 @@ function AuthedLayout() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !session) void router.navigate({ to: "/auth" });
-  }, [loading, session, router]);
+    if (!loading && !session && !member) void router.navigate({ to: "/auth" });
+  }, [loading, session, member, router]);
 
   if (session && memberChecked && !member) {
     return (
@@ -40,7 +40,7 @@ function AuthedLayout() {
     );
   }
 
-  if (loading || !session || !member) {
+  if (loading || (!session && !member)) {
     return (
       <div className="p-8">
         <SkeletonPage />
