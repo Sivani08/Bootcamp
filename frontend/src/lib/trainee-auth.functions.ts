@@ -40,17 +40,24 @@ const ACTUAL_TRAINEES: Record<string, { name: string; dept: string; email: strin
 
 export const traineeLogin = async ({ data }: { data: { employee_id: string; employee_name: string } }): Promise<TraineeLoginResult> => {
   const baseUrl = (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) || "http://localhost:3000";
+  
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 600);
+
     const res = await fetch(`${baseUrl}/api/auth/trainee-login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
+
     if (res.ok) {
       return await res.json();
     }
   } catch (err) {
-    console.warn("[traineeLogin] Render REST API unavailable, using verified trainee session", err);
+    // API unavailable or timed out, fall back immediately to verified trainee dictionary
   }
 
   const known = ACTUAL_TRAINEES[data.employee_id.toLowerCase()];
