@@ -1,10 +1,25 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/")({
-  beforeLoad: () => {
-    throw redirect({ to: "/dashboard" });
-  },
+  component: IndexComponent,
 });
+
+function IndexComponent() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    void navigate({ to: "/dashboard", replace: true });
+  }, [navigate]);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold tracking-tight">BootMind Platform</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Loading workspace...</p>
+      </div>
+    </div>
+  );
+}
 
 function VocabStreakLandingPage() {
   return (
