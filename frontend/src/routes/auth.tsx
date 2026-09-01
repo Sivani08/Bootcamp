@@ -243,7 +243,6 @@ function StaffForm({ onDone }: { onDone: () => void }) {
 
       await signInWithTokens({ access_token: `${role}_token_${Date.now()}`, refresh_token: `${role}_ref_token` }, staffMember);
       toast.success(`Signed in as ${staffMember.full_name} (${role.toUpperCase()} Workspace)`);
-      await refresh();
       onDone();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");

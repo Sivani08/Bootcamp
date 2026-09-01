@@ -152,9 +152,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await loadMember(data.session?.user.id, data.session?.user.email);
       },
       signInWithTokens: async (tokens, memberOverride?: MemberRow) => {
-        if (memberOverride && typeof window !== "undefined") {
-          localStorage.setItem("bootmind_local_member", JSON.stringify(memberOverride));
+        if (memberOverride) {
+          if (typeof window !== "undefined") {
+            localStorage.setItem("bootmind_local_member", JSON.stringify(memberOverride));
+          }
           setMember(memberOverride);
+          setLoading(false);
+          setMemberChecked(true);
+          return;
         }
         try {
           const { error } = await supabase.auth.setSession(tokens);
@@ -162,7 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch { /* ignore non-fatal session errors */ }
         const { data } = await supabase.auth.getSession();
         setSession(data.session);
-        await loadMember(data.session?.user?.id ?? memberOverride?.user_id ?? undefined, data.session?.user?.email ?? memberOverride?.email);
+        await loadMember(data.session?.user?.id, data.session?.user?.email);
       },
       signOut: async () => {
         if (typeof window !== "undefined") {
@@ -170,7 +175,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         setMember(null);
         setSession(null);
-        await supabase.auth.signOut();
+        setLoading(false);
+        setMemberChecked(true);
+        try {
+          await supabase.auth.signOut();
+        } catch { /* ignore */ }
       },
     }),
     [loading, memberChecked, effectiveSession, member]
