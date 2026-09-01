@@ -1,6 +1,6 @@
 @echo off
 title BootMind App Launcher
-echo Starting BootMind Development Server on http://localhost:8080/ ...
+echo Starting BootMind Development Server...
 cd /d "%~dp0"
-npx vite --port 8080
+npm run dev
 pause
