@@ -21,20 +21,11 @@ interface AuthState {
   role: Role | null;
   memberChecked: boolean;
   refresh: () => Promise<void>;
-  signInWithTokens: (tokens: { access_token: string; refresh_token: string }) => Promise<void>;
+  signInWithTokens: (tokens: { access_token: string; refresh_token: string }, memberOverride?: MemberRow) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
-
-const DEFAULT_MEMBER: MemberRow = {
-  id: "a0000000-0000-4000-a000-000000000001",
-  user_id: "a0000000-0000-4000-a000-000000000002",
-  full_name: "Monisha",
-  email: "monisha@gmail.com",
-  role: "admin",
-  title: "Program Director & Admin",
-};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -60,10 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           } catch { /* ignore */ }
         }
-        setMember(DEFAULT_MEMBER);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("bootmind_local_member", JSON.stringify(DEFAULT_MEMBER));
-        }
+        setMember(null);
         setMemberChecked(true);
         setLoading(false);
         return;
@@ -87,17 +75,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           const local = typeof window !== "undefined" ? localStorage.getItem("bootmind_local_member") : null;
           if (local) {
-            try { setMember(JSON.parse(local)); } catch { setMember(DEFAULT_MEMBER); }
+            try { setMember(JSON.parse(local)); } catch { setMember(null); }
           } else {
-            setMember(DEFAULT_MEMBER);
+            setMember(null);
           }
         }
       } else {
         const local = typeof window !== "undefined" ? localStorage.getItem("bootmind_local_member") : null;
         if (local) {
-          try { setMember(JSON.parse(local)); } catch { setMember(DEFAULT_MEMBER); }
+          try { setMember(JSON.parse(local)); } catch { setMember(null); }
         } else {
-          setMember(DEFAULT_MEMBER);
+          setMember(null);
         }
       }
     } finally {
@@ -122,7 +110,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!active) return;
       setSession(data.session);
       await loadMember(data.session?.user.id, data.session?.user.email);
-      setLoading(false);
     })();
     return () => {
       active = false;
@@ -130,11 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  useEffect(() => {
-    if (session?.user?.id) void loadMember(session.user.id, session.user.email);
-  }, [session]);
-
-  const effectiveSession: Session | null = useMemo(() => {
+  const effectiveSession = useMemo(() => {
     if (session) return session;
     if (member) {
       return {
@@ -179,16 +162,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch { /* ignore non-fatal session errors */ }
         const { data } = await supabase.auth.getSession();
         setSession(data.session);
-        await loadMember(data.session?.user.id, data.session?.user.email);
+        await loadMember(data.session?.user?.id ?? memberOverride?.user_id ?? undefined, data.session?.user?.email ?? memberOverride?.email);
       },
       signOut: async () => {
-        if (typeof window !== "undefined") localStorage.removeItem("bootmind_local_member");
-        await supabase.auth.signOut();
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("bootmind_local_member");
+        }
         setMember(null);
-        setMemberChecked(true);
+        setSession(null);
+        await supabase.auth.signOut();
       },
     }),
-    [loading, memberChecked, session, member, effectiveSession],
+    [loading, memberChecked, effectiveSession, member]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -196,6 +181,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }
